@@ -157,7 +157,10 @@ class Sample {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        try { reader.close(); }
+        catch (IOException err) {
+            err.printStackTrace();
+        }
         return new Sample(id, composer, title, uri, albumArtID);
     }
 

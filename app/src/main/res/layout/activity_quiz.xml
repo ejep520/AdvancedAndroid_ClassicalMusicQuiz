@@ -17,7 +17,7 @@
     xmlns:tools="http://schemas.android.com/tools"
 	tools:context="com.example.android.classicalmusicquiz.QuizActivity">
 
-	<LinearLayout
+	<androidx.constraintlayout.widget.ConstraintLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		tools:layout_editor_absoluteX="0dp"
@@ -82,7 +82,8 @@
 			app:layout_constraintLeft_toLeftOf="parent"
 			app:layout_constraintRight_toRightOf="parent"
 			app:layout_constraintTop_toTopOf="parent"
-			app:srcCompat="@drawable/question_mark" />
+			app:srcCompat="@drawable/question_mark"
+			android:contentDescription="@string/composer_image"/>
 
-	</LinearLayout>
+	</androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -35,7 +36,6 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final int CORRECT_ANSWER_DELAY_MILLIS = 1000;
     private static final String REMAINING_SONGS_KEY = "remaining_songs";
-    private final int[] mButtonIDs = {R.id.buttonA, R.id.buttonB, R.id.buttonC, R.id.buttonD};
     private ArrayList<Integer> mRemainingSampleIDs;
     private ArrayList<Integer> mQuestionSampleIDs;
     private int mAnswerSampleID;
@@ -90,16 +90,24 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
      *
      * @param answerSampleIDs The IDs of the possible answers to the question.
      * @return The Array of initialized buttons.
-     */
-    private Button[] initializeButtons(ArrayList<Integer> answerSampleIDs) {
-        Button[] buttons = new Button[mButtonIDs.length];
-        for (int i = 0; i < answerSampleIDs.size(); i++) {
-            Button currentButton = findViewById(mButtonIDs[i]);
-            Sample currentSample = Sample.getSampleByID(this, answerSampleIDs.get(i));
-            buttons[i] = currentButton;
-            currentButton.setOnClickListener(this);
-            if (currentSample != null) {
-                currentButton.setText(currentSample.getComposer());
+     **/
+    @NonNull
+    private Button[] initializeButtons(@NonNull ArrayList<Integer> answerSampleIDs) {
+        Button[] buttons = {binding.buttonA, binding.buttonB, binding.buttonC, binding.buttonD};
+        if (buttons.length > answerSampleIDs.size()) {
+            for (int counter = 3; counter >= 0; counter--) {
+                if (counter >= answerSampleIDs.size()) {
+                    buttons[counter].setVisibility(View.INVISIBLE);
+                }
+            }
+        }
+        for (int i = 0; i < buttons.length; i++) {
+            if (buttons[i].getVisibility() != View.INVISIBLE) {
+                Sample currentSample = Sample.getSampleByID(this, answerSampleIDs.get(i));
+                buttons[i].setOnClickListener(this);
+                if (currentSample != null) {
+                    buttons[i].setText(currentSample.getComposer());
+                }
             }
         }
         return buttons;
@@ -125,7 +133,7 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
         // Get the index of the pressed button
         int userAnswerIndex = -1;
         for (int i = 0; i < mButtons.length; i++) {
-            if (pressedButton.getId() == mButtonIDs[i]) {
+            if (pressedButton.getId() == mButtons[i].getId()) {
                 userAnswerIndex = i;
             }
         }
@@ -135,8 +143,7 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
 
         // If the user is correct, increase there score and update high score.
         if (QuizUtils.userCorrect(mAnswerSampleID, userAnswerSampleID)) {
-            mCurrentScore++;
-            QuizUtils.setCurrentScore(this, mCurrentScore);
+            QuizUtils.setCurrentScore(this, ++mCurrentScore);
             if (mCurrentScore > mHighScore) {
                 mHighScore = mCurrentScore;
                 QuizUtils.setHighScore(this, mHighScore);
