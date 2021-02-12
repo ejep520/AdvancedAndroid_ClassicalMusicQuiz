@@ -33,6 +33,7 @@ import com.google.android.exoplayer2.util.Util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /**
@@ -122,7 +123,7 @@ class Sample {
      * @return The Sample the JsonReader is pointing to.
      */
     private static Sample readEntry(JsonReader reader) {
-        Integer id = -1;
+        int id = -1;
         String composer = null;
         String title = null;
         String uri = null;
@@ -182,13 +183,13 @@ class Sample {
         }
 
         String userAgent = Util.getUserAgent(context, "ClassicalMusicQuiz");
-        DataSource dataSource = new DefaultDataSource(context, null, userAgent, false);
+        DataSource dataSource = new DefaultDataSource(context, userAgent, false);
         DataSpec dataSpec = new DataSpec(Uri.parse(uri));
         InputStream inputStream = new DataSourceInputStream(dataSource, dataSpec);
 
         JsonReader reader = null;
         try {
-            reader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
+            reader = new JsonReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8.toString()));
         } finally {
             Util.closeQuietly(dataSource);
         }

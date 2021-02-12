@@ -21,11 +21,13 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
+import com.example.android.classicalmusicquiz.databinding.ActivityQuizBinding;
 
 import java.util.ArrayList;
 
@@ -33,21 +35,21 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final int CORRECT_ANSWER_DELAY_MILLIS = 1000;
     private static final String REMAINING_SONGS_KEY = "remaining_songs";
-    private int[] mButtonIDs = {R.id.buttonA, R.id.buttonB, R.id.buttonC, R.id.buttonD};
+    private final int[] mButtonIDs = {R.id.buttonA, R.id.buttonB, R.id.buttonC, R.id.buttonD};
     private ArrayList<Integer> mRemainingSampleIDs;
     private ArrayList<Integer> mQuestionSampleIDs;
     private int mAnswerSampleID;
     private int mCurrentScore;
     private int mHighScore;
     private Button[] mButtons;
+	private ActivityQuizBinding binding;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_quiz);
-
-        ImageView composerView = (ImageView) findViewById(R.id.composerView);
+		binding = ActivityQuizBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         boolean isNewGame = !getIntent().hasExtra(REMAINING_SONGS_KEY);
 
@@ -69,7 +71,7 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
         mAnswerSampleID = QuizUtils.getCorrectAnswerID(mQuestionSampleIDs);
 
         // Load the image of the composer for the answer into the ImageView.
-        composerView.setImageBitmap(Sample.getComposerArtBySampleID(this, mAnswerSampleID));
+        binding.composerView.setImageBitmap(Sample.getComposerArtBySampleID(this, mAnswerSampleID));
 
         // If there is only one answer left, end the game.
         if (mQuestionSampleIDs.size() < 2) {
@@ -92,7 +94,7 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
     private Button[] initializeButtons(ArrayList<Integer> answerSampleIDs) {
         Button[] buttons = new Button[mButtonIDs.length];
         for (int i = 0; i < answerSampleIDs.size(); i++) {
-            Button currentButton = (Button) findViewById(mButtonIDs[i]);
+            Button currentButton = findViewById(mButtonIDs[i]);
             Sample currentSample = Sample.getSampleByID(this, answerSampleIDs.get(i));
             buttons[i] = currentButton;
             currentButton.setOnClickListener(this);
@@ -146,14 +148,11 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
 
         // Wait some time so the user can see the correct answer, then go to the next question.
         final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
+        handler.postDelayed(() -> {
                 Intent nextQuestionIntent = new Intent(QuizActivity.this, QuizActivity.class);
                 nextQuestionIntent.putExtra(REMAINING_SONGS_KEY, mRemainingSampleIDs);
                 finish();
                 startActivity(nextQuestionIntent);
-            }
         }, CORRECT_ANSWER_DELAY_MILLIS);
 
     }

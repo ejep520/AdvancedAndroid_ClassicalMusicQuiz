@@ -18,22 +18,26 @@ package com.example.android.classicalmusicquiz;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.android.classicalmusicquiz.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
 
     private static final String GAME_FINISHED = "game_finished";
-
+	private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+		binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        TextView highScoreTextView = (TextView) findViewById(R.id.highscoreText);
+        TextView highScoreTextView = findViewById(R.id.highscoreText);
 
         // Get the high and max score.
         int highScore = QuizUtils.getHighScore(this);
@@ -45,15 +49,12 @@ public class MainActivity extends AppCompatActivity {
 
         // If the game is over, show the game finished UI.
         if(getIntent().hasExtra(GAME_FINISHED)){
-            TextView gameFinishedTextView = (TextView) findViewById(R.id.gameResult);
-            TextView yourScoreTextView = (TextView) findViewById(R.id.resultScore);
-
             Integer yourScore = QuizUtils.getCurrentScore(this);
             String yourScoreText = getString(R.string.score_result, yourScore, maxScore);
-            yourScoreTextView.setText(yourScoreText);
+            binding.resultScore.setText(yourScoreText);
 
-            gameFinishedTextView.setVisibility(View.VISIBLE);
-            yourScoreTextView.setVisibility(View.VISIBLE);
+            binding.gameResult.setVisibility(View.VISIBLE);
+            binding.resultScore.setVisibility(View.VISIBLE);
         }
     }
 
