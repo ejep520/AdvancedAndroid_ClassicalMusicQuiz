@@ -18,11 +18,12 @@ package com.example.android.classicalmusicquiz;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.JsonReader;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
 
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSourceInputStream;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
  * Java Object representing a single sample. Also includes utility methods for obtaining samples
  * from assets.
  */
+@SuppressWarnings("unused")
 class Sample {
 
     private int mSampleID;
@@ -63,12 +65,12 @@ class Sample {
      * @param sampleID The sample ID.
      * @return The portrait Bitmap.
      */
-    static Bitmap getComposerArtBySampleID(Context context, int sampleID){
+    static Drawable getComposerArtBySampleID(Context context, int sampleID){
         Sample sample = Sample.getSampleByID(context, sampleID);
         int albumArtID = context.getResources().getIdentifier(
                 sample != null ? sample.getAlbumArtID() : null, "drawable",
                 context.getPackageName());
-        return BitmapFactory.decodeResource(context.getResources(), albumArtID);
+        return ContextCompat.getDrawable(context, albumArtID);
     }
 
     /**
@@ -157,10 +159,6 @@ class Sample {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        try { reader.close(); }
-        catch (IOException err) {
-            err.printStackTrace();
-        }
         return new Sample(id, composer, title, uri, albumArtID);
     }
 
@@ -190,7 +188,7 @@ class Sample {
         DataSpec dataSpec = new DataSpec(Uri.parse(uri));
         InputStream inputStream = new DataSourceInputStream(dataSource, dataSpec);
 
-        JsonReader reader = null;
+        JsonReader reader;
         try {
             reader = new JsonReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8.toString()));
         } finally {

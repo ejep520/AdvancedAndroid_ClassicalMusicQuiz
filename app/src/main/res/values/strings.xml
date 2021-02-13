@@ -20,6 +20,7 @@
     <string name="score_result">Your Score: %1$d / %2$d</string>
     <string name="guess">Can you guess the composer?</string>
     <string name="notification_text">Press play to hear the piece!</string>
+    <string name="sample_not_found_error">Sample not found!</string>
     <string name="sample_list_load_error">Error loading one or more samples!</string>
     <string name="composer_image">Image of a composer</string>
 </resources>

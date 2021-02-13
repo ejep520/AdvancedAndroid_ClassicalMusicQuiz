@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.exoplayer2.ui.PlayerControlView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:layoutDirection="ltr"
+    android:background="#CC0000">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingTop="4dp"
+        android:paddingBottom="0dp"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@id/exo_prev"
+            style="@style/ExoMediaButton.Previous" />
+        <ImageButton
+            android:id="@id/exo_play"
+            style="@style/ExoMediaButton.Play" />
+        <ImageView
+            android:id="@id/exo_pause"
+            style="@style/ExoMediaButton.Pause" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="0dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@id/exo_position"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="4dp"
+            android:includeFontPadding="false"
+            android:textColor="#FFBEBEBE" />
+
+        <SeekBar
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:id="@id/exo_progress"
+            android:focusable="false"
+            style="?android:attr/progressBarStyleHorizontal" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@id/exo_duration"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="4dp"
+            android:includeFontPadding="false"
+            android:textColor="#FFBEBEBE" />
+
+    </LinearLayout>
+
+</com.google.android.exoplayer2.ui.PlayerControlView>

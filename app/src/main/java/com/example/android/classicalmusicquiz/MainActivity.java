@@ -25,8 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.android.classicalmusicquiz.databinding.ActivityMainBinding;
 
-import java.util.ArrayList;
-
+@SuppressWarnings("FieldCanBeLocal")
 public class MainActivity extends AppCompatActivity {
 
 

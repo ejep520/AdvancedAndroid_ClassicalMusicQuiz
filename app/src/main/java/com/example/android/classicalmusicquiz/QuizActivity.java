@@ -16,13 +16,17 @@
 
 package com.example.android.classicalmusicquiz;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,11 +34,21 @@ import androidx.core.content.ContextCompat;
 
 import com.example.android.classicalmusicquiz.databinding.ActivityQuizBinding;
 
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.Player.EventListener;
+import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.PlayerView;
+
 import java.util.ArrayList;
 
-public class QuizActivity extends AppCompatActivity implements View.OnClickListener {
+public class QuizActivity extends AppCompatActivity implements View.OnClickListener, EventListener {
 
-    private static final int CORRECT_ANSWER_DELAY_MILLIS = 1000;
+    private static final int CORRECT_ANSWER_DELAY_MILLIS = 2000;
     private static final String REMAINING_SONGS_KEY = "remaining_songs";
     private ArrayList<Integer> mRemainingSampleIDs;
     private ArrayList<Integer> mQuestionSampleIDs;
@@ -43,7 +57,6 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
     private int mHighScore;
     private Button[] mButtons;
 	private ActivityQuizBinding binding;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +75,9 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
             mRemainingSampleIDs = getIntent().getIntegerArrayListExtra(REMAINING_SONGS_KEY);
         }
 
+        binding.playerView.setDefaultArtwork(ContextCompat
+                .getDrawable(this, R.drawable.question_mark));
+
         // Get current and high scores.
         mCurrentScore = QuizUtils.getCurrentScore(this);
         mHighScore = QuizUtils.getHighScore(this);
@@ -69,9 +85,6 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
         // Generate a question and get the correct answer.
         mQuestionSampleIDs = QuizUtils.generateQuestion(mRemainingSampleIDs);
         mAnswerSampleID = QuizUtils.getCorrectAnswerID(mQuestionSampleIDs);
-
-        // Load the image of the composer for the answer into the ImageView.
-        binding.composerView.setImageBitmap(Sample.getComposerArtBySampleID(this, mAnswerSampleID));
 
         // If there is only one answer left, end the game.
         if (mQuestionSampleIDs.size() < 2) {
@@ -81,6 +94,14 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
 
         // Initialize the buttons with the composers names.
         mButtons = initializeButtons(mQuestionSampleIDs);
+
+        Sample answerSample = Sample.getSampleByID(this, mAnswerSampleID);
+        if (answerSample == null) {
+            Toast.makeText(this, R.string.sample_not_found_error, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        initializePlayer(Uri.parse(answerSample.getUri()));
     }
 
 
@@ -176,14 +197,71 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
                 mButtons[i].getBackground().setColorFilter(ContextCompat.getColor
                                 (this, android.R.color.holo_green_light),
                         PorterDuff.Mode.MULTIPLY);
-                mButtons[i].setTextColor(Color.WHITE);
             } else {
                 mButtons[i].getBackground().setColorFilter(ContextCompat.getColor
                                 (this, android.R.color.holo_red_light),
                         PorterDuff.Mode.MULTIPLY);
-                mButtons[i].setTextColor(Color.WHITE);
-
             }
+            mButtons[i].setTextColor(Color.WHITE);
         }
+        binding.playerView.setDefaultArtwork(Sample
+                .getComposerArtBySampleID(this, mAnswerSampleID));
+    }
+
+    /**
+     * Initialize ExoPlayer.
+     * @param mediaUri The URI of the sample to play.
+     */
+    private void initializePlayer(Uri mediaUri) {
+        if (binding.playerView.getPlayer() != null) { return;}
+
+        // Create an instance of the ExoPlayer.
+        MediaItem mediaItem = MediaItem.fromUri(mediaUri);
+        TrackSelector trackSelector = new DefaultTrackSelector(this);
+        LoadControl loadControl = new DefaultLoadControl();
+        SimpleExoPlayer.Builder builder = new SimpleExoPlayer.Builder(this);
+        builder.setTrackSelector(trackSelector);
+        builder.setLoadControl(loadControl);
+        binding.playerView.setPlayer(builder.build());
+        binding.playerView.getPlayer().addListener(this);
+        binding.playerView.getPlayer().setMediaItem(mediaItem);
+        binding.playerView.getPlayer().setPlayWhenReady(true);
+        binding.playerView.getPlayer().prepare();
+    }
+
+    private void releasePlayer(@NonNull PlayerView player) {
+        player.getPlayer().stop();
+        player.getPlayer().release();
+        player.setPlayer(null);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        PlayerView player = findViewById(R.id.playerView);
+        if ((player != null) && (player.getPlayer() != null)) {
+            Log.i("QuizActivity", "onDestroy did it.");
+            releasePlayer(player);
+        }
+    }
+
+    @SuppressLint("SwitchIntDef")
+    public void onPlaybackStateChanged(@Player.State int playbackState){
+        String message;
+        switch(playbackState) {
+            case Player.STATE_IDLE:
+                message="State changed to idle.";
+                break;
+            case Player.STATE_BUFFERING:
+                message = "State changed to buffering.";
+                break;
+            case Player.STATE_READY:
+                message = "State changed to ready.";
+                break;
+            default:
+                message = "State changed to ended.";
+                break;
+        }
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }
