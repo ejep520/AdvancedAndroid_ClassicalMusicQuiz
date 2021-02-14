@@ -83,7 +83,6 @@
 			app:layout_constraintRight_toRightOf="parent"
 			app:layout_constraintTop_toTopOf="parent"
 			app:srcCompat="@drawable/question_mark"
-			app:controller_layout_id="@layout/exo_playback_control_view"
 			android:contentDescription="@string/composer_image"/>
 
 	</androidx.constraintlayout.widget.ConstraintLayout>

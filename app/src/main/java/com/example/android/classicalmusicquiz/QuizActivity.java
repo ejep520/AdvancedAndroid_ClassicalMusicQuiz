@@ -74,7 +74,6 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             mRemainingSampleIDs = getIntent().getIntegerArrayListExtra(REMAINING_SONGS_KEY);
         }
-
         binding.playerView.setDefaultArtwork(ContextCompat
                 .getDrawable(this, R.drawable.question_mark));
 
@@ -100,7 +99,6 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, R.string.sample_not_found_error, Toast.LENGTH_SHORT).show();
             return;
         }
-
         initializePlayer(Uri.parse(answerSample.getUri()));
     }
 
@@ -114,7 +112,7 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
      **/
     @NonNull
     private Button[] initializeButtons(@NonNull ArrayList<Integer> answerSampleIDs) {
-        Button[] buttons = {binding.buttonA, binding.buttonB, binding.buttonC, binding.buttonD};
+        Button[] buttons = { binding.buttonA, binding.buttonB, binding.buttonC, binding.buttonD};
         if (buttons.length > answerSampleIDs.size()) {
             for (int counter = 3; counter >= 0; counter--) {
                 if (counter >= answerSampleIDs.size()) {
@@ -230,24 +228,44 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void releasePlayer(@NonNull PlayerView player) {
-        player.getPlayer().stop();
-        player.getPlayer().release();
-        player.setPlayer(null);
+        if (player.getPlayer() != null) {
+            player.getPlayer().stop();
+            player.getPlayer().release();
+            player.setPlayer(null);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (binding.playerView.getPlayer() != null) {
+            binding.playerView.getPlayer().pause();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (binding.playerView.getPlayer() == null) {
+            return;
+        }
+        binding.playerView.getPlayer().prepare();
+        binding.playerView.getPlayer().play();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         PlayerView player = findViewById(R.id.playerView);
-        if ((player != null) && (player.getPlayer() != null)) {
-            Log.i("QuizActivity", "onDestroy did it.");
-            releasePlayer(player);
+        if ((player != null) && (binding.playerView.getPlayer() != null)) {
+            releasePlayer(binding.playerView);
         }
     }
 
     @SuppressLint("SwitchIntDef")
     public void onPlaybackStateChanged(@Player.State int playbackState){
         String message;
+        final String LOG_ID = "QuizActivity";
         switch(playbackState) {
             case Player.STATE_IDLE:
                 message="State changed to idle.";
@@ -262,6 +280,6 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
                 message = "State changed to ended.";
                 break;
         }
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        Log.i(LOG_ID, message);
     }
 }
